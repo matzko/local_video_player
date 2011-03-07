@@ -18,7 +18,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 				return;
 
 			$this->_plugin_dir_url = plugin_dir_url(__FILE__);
-			wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'flowplayer-3.2.2.min.js', array(), '3.2.2');
+			wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'flowplayer-3.2.6.min.js', array(), '3.2.6');
 			add_shortcode('local-video', array($this, 'shortcode_local_video'));
 		}
 
@@ -34,7 +34,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			<script>
 				flowplayer("player-' . $id . '", 
 						{ 
-							src : "' . $this->_plugin_dir_url . 'flowplayer-3.2.2.swf",
+							src : "' . $this->_plugin_dir_url . 'flowplayer-3.2.7.swf",
 							wmode: "transparent"
 						},
 						{ 
