@@ -25,23 +25,23 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 		public function print_video_player($file_url = '', $id = '', $height = 330, $width = 520)
 		{
 			$return = '
-			<a  
-				 href="' . $file_url . '"  
+			<div  
 				 style="clear:both;display:block;width:' . $width . 'px;height:' . $height . 'px"  
 				 id="player-' . $id . '"> 
-			</a> 
+			</div> 
 		
 			<script>
 				flowplayer("player-' . $id . '", 
-						{ 
+						{
 							src : "' . $this->_plugin_dir_url . 'flowplayer-3.2.7.swf",
 							wmode: "transparent"
 						},
-						{ 
-							clip:  { 
+						{
+							clip:{
 								autoPlay: false, 
 								autoBuffering: true
-							}
+							},
+							playlist:["' . esc_js( $file_url ) . '"]
 						}
 					);
 			</script>';
