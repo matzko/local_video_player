@@ -47,15 +47,27 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			) );
 
 
-			$config_string = json_encode( $config_values );
-			$general_string = json_encode(
+			$config_string = $this->_literalize_strings( json_encode( $config_values ) );
+			$general_string = $this->_literalize_strings( json_encode(
 				array_merge(
 					array( 'clip' => $clip_values ),
 					$player_events
 				)
-			);
+			) );
 
 			return array( $config_string, $general_string );
+		}
+
+		protected function _literalize_strings( $text = '' )
+		{
+			$replacements = array(
+				'\'%%RMS%' => '',
+				'%%RME%s\'' => '',
+				'"%%RMS%' => '',
+				'%%RME%s"' => '',
+			);
+
+			return str_replace( array_keys( $replacements ), array_values( $replacements ), $text );
 		}
 
 		/**
@@ -63,12 +75,16 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 		 *
 		 * @param string $key The clip key.
 		 * @param string $value The clip value.  When set to -null- that key is unset.
+		 * @param bool $is_js_literal Treat as a JavaScript object literal upon output (no quotation marks).
 		 */
-		public function add_clip_value( $key = '', $value = null )
+		public function add_clip_value( $key = '', $value = null, $is_js_literal = false )
 		{
 			if ( null === $value && isset( $this->_clip_values[$key] ) ) {
 				unset( $this->_clip_values[$key] );
 			} else {
+				if ( $is_js_literal ) {
+					$value = '%%RMS%' . $value . '%%RME%s';
+				}
 				$this->_clip_values[$key] = $value;
 			}
 		}
@@ -78,12 +94,16 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 		 *
 		 * @param string $key The player event key.
 		 * @param string $value The player event value.  When set to -null- that key is unset.
+		 * @param bool $is_js_literal Treat as a JavaScript object literal upon output (no quotation marks).
 		 */
-		public function add_player_event( $key = '', $value = null )
+		public function add_player_event( $key = '', $value = null, $is_js_literal = false )
 		{
 			if ( null === $value && isset( $this->_player_events[$key] ) ) {
 				unset( $this->_player_events[$key] );
 			} else {
+				if ( $is_js_literal ) {
+					$value = '%%RMS%' . $value . '%%RME%s';
+				}
 				$this->_player_events[$key] = $value;
 			}
 		}
