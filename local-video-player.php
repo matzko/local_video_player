@@ -11,6 +11,8 @@ Author URI: http://austinmatzko.com
 if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 	class LocalVideoPlayer {
 		protected $_plugin_dir_url = '';
+		protected $_clip_values = array();
+		protected $_player_events = array();
 
 		public function __construct()
 		{
@@ -20,10 +22,75 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			$this->_plugin_dir_url = plugin_dir_url(__FILE__);
 			wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'flowplayer-3.2.6.min.js', array(), '3.2.6');
 			add_shortcode('local-video', array($this, 'shortcode_local_video'));
+
+			$this->add_clip_value( 'autoPlay', false );
+			$this->add_clip_value( 'autoBuffering', true );
+		}
+
+		protected function _build_flowplayer_object( $video_files = array() )
+		{
+			$swf_src = apply_filters( 'local_video_player_swf_src',  $this->_plugin_dir_url . 'flowplayer-3.2.7.swf' );
+			$config_values = array(
+				'src' => $swf_src,
+				'wmode' => 'transparent',
+			);
+
+			$clip_values = apply_filters( 'local_video_player_clip_values', $this->_clip_values );
+			
+			$video_files = apply_filters( 'local_video_player_video_files', $video_files );
+
+			$player_events = apply_filters( 'local_video_player_player_events', array_merge(
+				array(
+					'playlist' => $video_files,
+				),
+				$this->_player_events
+			) );
+
+
+			$config_string = json_encode( $config_values );
+			$general_string = json_encode(
+				array_merge(
+					array( 'clip' => $clip_values ),
+					$player_events
+				)
+			);
+
+			return array( $config_string, $general_string );
+		}
+
+		/**
+		 * Add a clip key and value to the config setup.
+		 *
+		 * @param string $key The clip key.
+		 * @param string $value The clip value.  When set to -null- that key is unset.
+		 */
+		public function add_clip_value( $key = '', $value = null )
+		{
+			if ( null === $value && isset( $this->_clip_values[$key] ) ) {
+				unset( $this->_clip_values[$key] );
+			} else {
+				$this->_clip_values[$key] = $value;
+			}
+		}
+
+		/**
+		 * Add a player event key and value to the config setup.
+		 *
+		 * @param string $key The player event key.
+		 * @param string $value The player event value.  When set to -null- that key is unset.
+		 */
+		public function add_player_event( $key = '', $value = null )
+		{
+			if ( null === $value && isset( $this->_player_events[$key] ) ) {
+				unset( $this->_player_events[$key] );
+			} else {
+				$this->_player_events[$key] = $value;
+			}
 		}
 
 		public function print_video_player($file_url = '', $id = '', $height = 330, $width = 520)
 		{
+			list( $config, $general ) = $this->_build_flowplayer_object( array( $file_url ) );
 			$return = '
 			<div  
 				 style="clear:both;display:block;width:' . $width . 'px;height:' . $height . 'px"  
@@ -31,19 +98,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			</div> 
 		
 			<script>
-				flowplayer("player-' . $id . '", 
-						{
-							src : "' . $this->_plugin_dir_url . 'flowplayer-3.2.7.swf",
-							wmode: "transparent"
-						},
-						{
-							clip:{
-								autoPlay: false, 
-								autoBuffering: true
-							},
-							playlist:["' . esc_js( $file_url ) . '"]
-						}
-					);
+				flowplayer("player-' . $id . '", ' . $config . ',' . $general . ');
 			</script>';
 
 			return $return;
