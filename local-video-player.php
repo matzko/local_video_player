@@ -29,7 +29,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'flowplayer-3.2.6.min.js', array(), '3.2.6');
 
 			if ( $this->support_ios ) {
-				wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'plugins/flowplayer.ipad-3.2.2.min.js', array( 'flowplayer' ), '3.2.2');
+				wp_enqueue_script('flowplayer-ios-support', $this->_plugin_dir_url . 'plugins/flowplayer.ipad-3.2.2.min.js', array( 'flowplayer' ), '3.2.2');
 			}
 
 			add_shortcode('local-video', array($this, 'shortcode_local_video'));
