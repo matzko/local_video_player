@@ -15,13 +15,23 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 		protected $_player_events = array();
 		protected $_playlist_properties = array();
 
+		public $support_ios;
+
 		public function __construct()
 		{
 			if ( is_admin() )
 				return;
 
 			$this->_plugin_dir_url = plugin_dir_url(__FILE__);
+
+			$this->support_ios = apply_filters( 'local_video_player_suppport_ios', true );
+
 			wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'flowplayer-3.2.6.min.js', array(), '3.2.6');
+
+			if ( $this->support_ios ) {
+				wp_enqueue_script('flowplayer', $this->_plugin_dir_url . 'plugins/flowplayer.ipad-3.2.2.min.js', array( 'flowplayer' ), '3.2.2');
+			}
+
 			add_shortcode('local-video', array($this, 'shortcode_local_video'));
 
 			$this->add_clip_value( 'autoPlay', false );
@@ -171,7 +181,11 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			</div> 
 		
 			<script>
-				flowplayer("player-' . $id . '", ' . $config . ',' . $general . ');
+				flowplayer("player-' . $id . '", ' . $config . ',' . $general . ')';
+				if ( $this->support_ios ) {
+					$return .= '.ipad()';
+				}
+			$return .= '
 			</script>';
 
 			return $return;
