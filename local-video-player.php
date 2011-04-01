@@ -38,19 +38,19 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			$this->add_clip_value( 'autoBuffering', true );
 		}
 
-		public function get_flowplayer_config_literal()
+		public function get_flowplayer_params_literal()
 		{
 			$swf_src = apply_filters( 'local_video_player_swf_src',  $this->_plugin_dir_url . 'flowplayer-3.2.7.swf' );
-			$config_values = array(
+			$params_values = array(
 				'src' => $swf_src,
 				'wmode' => 'transparent',
 			);
 			
-			return $this->_literalize_strings( json_encode( $config_values ) );
+			return $this->_literalize_strings( json_encode( $params_values ) );
 		}
 
 
-		public function get_flowplayer_options_literal( $video_files = array() )
+		public function get_flowplayer_config_literal( $video_files = array() )
 		{
 			$clip_values = apply_filters( 'local_video_player_clip_values', $this->_clip_values );
 			
@@ -178,8 +178,8 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 
 		public function print_video_player($file_url = '', $id = '', $height = 330, $width = 520)
 		{
-			$config = $this->get_flowplayer_config_literal();
-			$general = $this->get_flowplayer_options_literal( array( $file_url ) );
+			$params = $this->get_flowplayer_params_literal();
+			$config = $this->get_flowplayer_config_literal( array( $file_url ) );
 			$return = '
 			<div  
 				 style="clear:both;display:block;width:' . $width . 'px;height:' . $height . 'px"  
@@ -187,7 +187,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			</div> 
 		
 			<script>
-				flowplayer("player-' . $id . '", ' . $config . ',' . $general . ')';
+				flowplayer("player-' . $id . '", ' . $params . ',' . $config . ')';
 				if ( $this->support_ios ) {
 					$return .= '.ipad()';
 				}
