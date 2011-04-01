@@ -38,14 +38,20 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			$this->add_clip_value( 'autoBuffering', true );
 		}
 
-		protected function _build_flowplayer_object( $video_files = array() )
+		public function get_flowplayer_config_literal()
 		{
 			$swf_src = apply_filters( 'local_video_player_swf_src',  $this->_plugin_dir_url . 'flowplayer-3.2.7.swf' );
 			$config_values = array(
 				'src' => $swf_src,
 				'wmode' => 'transparent',
 			);
+			
+			return $this->_literalize_strings( json_encode( $config_values ) );
+		}
 
+
+		public function get_flowplayer_options_literal( $video_files = array() )
+		{
 			$clip_values = apply_filters( 'local_video_player_clip_values', $this->_clip_values );
 			
 			$video_files = apply_filters( 'local_video_player_video_files', $video_files );
@@ -74,7 +80,6 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			) );
 
 
-			$config_string = $this->_literalize_strings( json_encode( $config_values ) );
 			$general_string = $this->_literalize_strings( json_encode(
 				array_merge(
 					array( 'clip' => $clip_values ),
@@ -82,7 +87,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 				)
 			) );
 
-			return array( $config_string, $general_string );
+			return $general_string;
 		}
 
 		protected function _get_playlist_item_properties( $url = '' )
@@ -173,11 +178,12 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 
 		public function print_video_player($file_url = '', $id = '', $height = 330, $width = 520)
 		{
-			list( $config, $general ) = $this->_build_flowplayer_object( array( $file_url ) );
+			$config = $this->get_flowplayer_config_literal();
+			$general = $this->get_flowplayer_options_literal( array( $file_url ) );
 			$return = '
 			<div  
 				 style="clear:both;display:block;width:' . $width . 'px;height:' . $height . 'px"  
-				 id="player-' . $id . '"> 
+				 id="player-' . $id . '" class="video-player-wrapper"> 
 			</div> 
 		
 			<script>
