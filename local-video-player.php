@@ -38,19 +38,22 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			$this->add_clip_value( 'autoBuffering', true );
 		}
 
-		public function get_flowplayer_params_literal()
+		public function get_flowplayer_params()
 		{
 			$swf_src = apply_filters( 'local_video_player_swf_src',  $this->_plugin_dir_url . 'flowplayer-3.2.7.swf' );
-			$params_values = array(
+			return array(
 				'src' => $swf_src,
 				'wmode' => 'transparent',
 			);
-			
+		}
+
+		public function get_flowplayer_params_literal()
+		{
+			$params_values = $this->get_flowplayer_params();
 			return $this->_literalize_strings( json_encode( $params_values ) );
 		}
 
-
-		public function get_flowplayer_config_literal( $video_files = array() )
+		public function get_flowplayer_config( $video_files = array() )
 		{
 			$clip_values = apply_filters( 'local_video_player_clip_values', $this->_clip_values );
 			
@@ -79,15 +82,16 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 				$this->_player_events
 			) );
 
+			return array_merge(
+				array( 'clip' => $clip_values ),
+				$player_events
+			);
+		}
 
-			$general_string = $this->_literalize_strings( json_encode(
-				array_merge(
-					array( 'clip' => $clip_values ),
-					$player_events
-				)
-			) );
-
-			return $general_string;
+		public function get_flowplayer_config_literal( $video_files = array() )
+		{
+			$config = $this->get_flowplayer_config( $video_files );
+			return $this->_literalize_strings( json_encode( $config ) ); 
 		}
 
 		protected function _get_playlist_item_properties( $url = '' )
