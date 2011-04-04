@@ -53,9 +53,13 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			return $this->_literalize_strings( json_encode( $params_values ) );
 		}
 
-		public function get_flowplayer_config( $video_files = array() )
+		public function get_flowplayer_config( $video_files = array(), $prep_for_literal = false )
 		{
+			$prep_for_literal = (bool) $prep_for_literal;
 			$clip_values = apply_filters( 'local_video_player_clip_values', $this->_clip_values );
+			if ( ! $prep_for_literal ) {
+				$clip_values = array_map( array( $this, '_unprep_literal_formatting' ), $clip_values );
+			}
 			
 			$video_files = apply_filters( 'local_video_player_video_files', $video_files );
 			$playlist = array();
@@ -72,6 +76,15 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 				if ( ! empty( $props ) ) {
 					$item_play = array_merge( $item_play, $props );	
 				}
+
+				if ( ! $prep_for_literal ) {
+					foreach( $item_play as $key => $value ) {
+						if ( is_array( $value ) ) {
+							$item_play[$key] = array_map( array( $this, '_unprep_literal_formatting' ), $value );
+						}
+					}
+				}
+
 				$playlist[] = $item_play;
 			}
 
@@ -90,7 +103,7 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 
 		public function get_flowplayer_config_literal( $video_files = array() )
 		{
-			$config = $this->get_flowplayer_config( $video_files );
+			$config = $this->get_flowplayer_config( $video_files, true );
 			return $this->_literalize_strings( json_encode( $config ) ); 
 		}
 
@@ -120,6 +133,19 @@ if ( ! class_exists( 'LocalVideoPlayer' ) ) {
 			);
 
 			return str_replace( array_keys( $replacements ), array_values( $replacements ), $text );
+		}
+
+		protected function _unprep_literal_formatting( $text = '' )
+		{
+			if ( is_string( $text ) ) {
+				$replacements = array(
+					'%%RMS%' => '',
+					'%%RME%s' => '',
+				);
+
+				$text = str_replace( array_keys( $replacements ), array_values( $replacements ), $text );
+			}
+			return $text;
 		}
 
 		/**
